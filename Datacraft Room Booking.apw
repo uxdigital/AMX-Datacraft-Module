@@ -146,6 +146,10 @@
 <FilePathName>Code\Datacraft UI Functions v1-01.axi</FilePathName>
 <Comments></Comments>
 </File>
+<File CompileType="None" Type="DUET"><Identifier>DatacraftHospitality_dr1_0_0</Identifier>
+<FilePathName>Code\DatacraftHospitality_dr1_0_0.jar</FilePathName>
+<Comments></Comments>
+</File>
 <File CompileType="None" Type="Include"><Identifier>DatacraftTouchPanelAPI</Identifier>
 <FilePathName>Code\DatacraftTouchPanelAPI.axi</FilePathName>
 <Comments></Comments>
@@ -172,6 +176,10 @@
 </File>
 <File CompileType="None" Type="Include"><Identifier>UI Kit v1-01</Identifier>
 <FilePathName>Code\UI Kit v1-01.axi</FilePathName>
+<Comments></Comments>
+</File>
+<File CompileType="None" Type="Include"><Identifier>UI Language API v1-01</Identifier>
+<FilePathName>Code\UI Language API v1-01.axi</FilePathName>
 <Comments></Comments>
 </File>
 <File CompileType="None" Type="Other"><Identifier>DatacraftAMXInterfaceProgramming</Identifier>
