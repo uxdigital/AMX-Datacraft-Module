@@ -20,6 +20,12 @@ DEFINE_CONSTANT
 
 UI_MAX_DEVICES = 30
 
+//Meeting State Constants - Edit if these are different
+M_STATE_PROVISIONAL		= 1
+M_STATE_CONFIRMED		= 2
+M_STATE_IN_PROGRESS		= 4
+M_STATE_ENDED			= 6
+
 #INCLUDE 'Core Library v1-02'
 #INCLUDE 'UI Kit API v1-01'
 #INCLUDE 'Datacraft UI Controller Constansts v1-01'
@@ -125,7 +131,7 @@ DEFINE_FUNCTION UpdateUIRoomNameText(CHAR uiDeviceKey[], INTEGER uiJoin, CHAR na
 DEFINE_FUNCTION UpdateUIStartMeetingButtonState(CHAR uiDeviceKey[], INTEGER state) {
     STACK_VAR _UI_COLOUR colour
 
-    if(state == 2) {
+    if(state == M_STATE_CONFIRMED) {
 	UIText(uiDeviceKey, UI_JOIN_START_MEETING, UI_STATE_ALL, 'START MEETING')
 	colour.red = $FF
 	colour.green = $FF
@@ -133,7 +139,7 @@ DEFINE_FUNCTION UpdateUIStartMeetingButtonState(CHAR uiDeviceKey[], INTEGER stat
 	UITextColour(uiDeviceKey, UI_JOIN_START_MEETING, UI_STATE_ALL, colour)
 	UIBorderColour(uiDeviceKey, UI_JOIN_START_MEETING, UI_STATE_ALL, colour)
 	UIButtonShow(uiDeviceKey, UI_JOIN_START_MEETING)
-    } else if(state == 4 && AtoI(UIGetVarValue(uiDeviceKey, UI_VAR_END_MEETING_ENABLE))) {
+    } else if(state == M_STATE_IN_PROGRESS && AtoI(UIGetVarValue(uiDeviceKey, UI_VAR_END_MEETING_ENABLE))) {
 	UIText(uiDeviceKey, UI_JOIN_START_MEETING, UI_STATE_ALL, "'MEETING IN PROGRESS', $0A, 'END MEETING'")
 	colour.red = $FF
 	colour.green = $FF
@@ -141,7 +147,7 @@ DEFINE_FUNCTION UpdateUIStartMeetingButtonState(CHAR uiDeviceKey[], INTEGER stat
 	UITextColour(uiDeviceKey, UI_JOIN_START_MEETING, UI_STATE_ALL, colour)
 	UIBorderColour(uiDeviceKey, UI_JOIN_START_MEETING, UI_STATE_ALL, colour)
 	UIButtonShow(uiDeviceKey, UI_JOIN_START_MEETING)
-    } else if(state == 4) {
+    } else if(state == M_STATE_IN_PROGRESS) {
 	UIText(uiDeviceKey, UI_JOIN_START_MEETING, UI_STATE_ALL, 'MEETING IN PROGRESS')
 	colour.red = $CC
 	colour.green = $CC
@@ -152,7 +158,7 @@ DEFINE_FUNCTION UpdateUIStartMeetingButtonState(CHAR uiDeviceKey[], INTEGER stat
 	colour.blue = $AA
 	UIBorderColour(uiDeviceKey, UI_JOIN_START_MEETING, UI_STATE_ALL, colour)
 	UIButtonShow(uiDeviceKey, UI_JOIN_START_MEETING)
-    } else if(state == 6) {
+    } else if(state == M_STATE_ENDED) {
 	UIText(uiDeviceKey, UI_JOIN_START_MEETING, UI_STATE_ALL, 'MEETING HAS ENDED')
 	colour.red = $CC
 	colour.green = $CC
@@ -196,7 +202,7 @@ DEFINE_FUNCTION UpdateUIwithRoomID(CHAR uiDeviceKey[], INTEGER roomID) {
 		UISetVarValue(uiDeviceKey, UI_VAR_BOOKING_IN_PROGRESS, '0')
 	    }
 	    UISetModeInUse(uiDeviceKey)
-	    if(rooms[roomIndex].todaysMeetings[meetingIndex].state >= 1 && rooms[roomIndex].todaysMeetings[meetingIndex].state <= 4) { // You may need to adjust these state values
+	    if(rooms[roomIndex].todaysMeetings[meetingIndex].state >= M_STATE_PROVISIONAL && rooms[roomIndex].todaysMeetings[meetingIndex].state <= M_STATE_IN_PROGRESS) { // You may need to adjust these state values
 		SEND_COMMAND controllerDevice, "'CURRENT_MEETING_INFO-', ItoA(rooms[roomIndex].id), ',', ItoA(meetingID), ',',
 		    TimeAsTimeStamp(rooms[roomIndex].todaysMeetings[meetingIndex].startTime), ',',
 		    TimeAsTimeStamp(rooms[roomIndex].todaysMeetings[meetingIndex].endTime), ',',
