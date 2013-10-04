@@ -1,0 +1,6 @@
+[submodule "Code/lib/core-library"]
+	path = Code/lib/core-library
+	url = https://github.com/controldesigns/AMX-Core-Library.git
+[submodule "Code/lib/ui-kit"]
+	path = Code/lib/ui-kit
+	url = https://github.com/controldesigns/AMX-UI-Kit-API.git

@@ -63,7 +63,7 @@ INTEGER roomBookingIDForThisRoom	= 26
 (*  and other modules. Also includes 'SNAPI' and some add-on functions.        *)
 (*******************************************************************************)
 #DEFINE CORE_LIBRARY
-#INCLUDE 'Core Library v1-02'
+#INCLUDE 'Core Library'
 
 
 (*******************************************************************************)

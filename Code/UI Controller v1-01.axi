@@ -6,12 +6,12 @@ PROGRAM_NAME='UI Controller v1-01'
 (***********************************************************)
 
 #IF_NOT_DEFINED CORE_LIBRARY
-#INCLUDE 'Core Library v1-02'
+#INCLUDE 'Core Library'
 #END_IF
 
 #DEFINE UI_KIT
-#INCLUDE 'UI Kit API v1-01'
-#INCLUDE 'UI Language API v1-01'
+#INCLUDE 'UI Kit API'
+#INCLUDE 'UI Language API'
 #INCLUDE 'UI Controller Core v1-01'
 
 

@@ -26,8 +26,8 @@ M_STATE_CONFIRMED		= 2
 M_STATE_IN_PROGRESS		= 4
 M_STATE_ENDED			= 6
 
-#INCLUDE 'Core Library v1-02'
-#INCLUDE 'UI Kit API v1-01'
+#INCLUDE 'Core Library'
+#INCLUDE 'UI Kit API'
 #INCLUDE 'Datacraft UI Controller Constansts v1-01'
 #INCLUDE 'DatacraftTouchPanelAPI'
 #INCLUDE 'Datacraft UI Functions v1-01'
