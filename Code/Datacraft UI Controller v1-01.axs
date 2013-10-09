@@ -29,6 +29,9 @@ M_STATE_ENDED			= 11
 //Meeting Type for use with Ad Hoc bookings from the UI
 AD_HOC_MEETING_TYPE		= 20
 
+//Set for API User key for permissions
+EXTEND_MEETING_USER_KEY		= 2
+
 #INCLUDE 'Core Library'
 #INCLUDE 'UI Kit API'
 #INCLUDE 'Datacraft UI Controller Constansts v1-01'
@@ -67,6 +70,20 @@ DEFINE_FUNCTION UserInterfaceVarsShouldRegister() {
 }
 
 DEFINE_FUNCTION UserInterfaceHasRegistered(CHAR uiDeviceKey[]) {
+    LoadUIData(uiDeviceKey)
+}
+
+// END UI KIT
+
+DEFINE_FUNCTION SaveUIData(CHAR uiDeviceKey[]) {
+    STACK_VAR CHAR fileName[50]
+    
+    fileName = "'room_booking_ui_config_', uiDeviceKey, '.xml'"
+    
+    UISaveCurrentVarsToXML(uiDeviceKey, fileName)
+}
+
+DEFINE_FUNCTION LoadUIData(CHAR uiDeviceKey[]) {
     STACK_VAR CHAR fileName[50]
     
     fileName = "'room_booking_ui_config_', uiDeviceKey, '.xml'"
@@ -556,6 +573,7 @@ DATA_EVENT[controllerDevice] {
 			if(AtoI(snapi.param[2])) {
 			    UISetVarValue(UIGetKeyForIndex(n), UI_VAR_ROOM_ID, snapi.param[2])
 			    UISetVarValue(UIGetKeyForIndex(n), UI_VAR_ROOM_COLLECTION_ID, snapi.param[3])
+			    SaveUIData(UIGetKeyForIndex(n))
 			    RefreshRoom(AtoI(snapi.param[2]))
 			}
 		    }
@@ -566,6 +584,7 @@ DATA_EVENT[controllerDevice] {
 		if(n) {
 		    if(UIIsRegistered(n)) {
 			UISetVarValue(UIGetKeyForIndex(n), UI_VAR_ADHOC_BOOKING_ENABLED, snapi.param[2])
+			SaveUIData(UIGetKeyForIndex(n))
 		    }
 		}
 	    }
@@ -574,6 +593,7 @@ DATA_EVENT[controllerDevice] {
 		if(n) {
 		    if(UIIsRegistered(n)) {
 			UISetVarValue(UIGetKeyForIndex(n), UI_VAR_END_MEETING_ENABLE, snapi.param[2])
+			SaveUIData(UIGetKeyForIndex(n))
 		    }
 		}
 	    }
