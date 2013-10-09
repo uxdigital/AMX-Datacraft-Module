@@ -46,17 +46,25 @@ DEFINE_FUNCTION UserInterfacesShouldRegister() {
 }
 
 DEFINE_FUNCTION UserInterfaceVarsShouldRegister() {
-    UIVarRegister(UI_DEVICES_ALL, UI_VAR_ROOM_ID, '0')
-    UIVarRegister(UI_DEVICES_ALL, UI_VAR_ROOM_COLLECTION_ID, '0')
+    UIVarRegisterWithFileStorage(UI_DEVICES_ALL, UI_VAR_ROOM_ID, '0')
+    UIVarRegisterWithFileStorage(UI_DEVICES_ALL, UI_VAR_ROOM_COLLECTION_ID, '0')
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_EMPLOYEE_CODE_ENTRY, '03')
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_BOOKING_SELECTED_TIME, '')
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_BOOKING_IN_PROGRESS, '0')
-    UIVarRegister(UI_DEVICES_ALL, UI_VAR_ADHOC_BOOKING_ENABLED, '0')
+    UIVarRegisterWithFileStorage(UI_DEVICES_ALL, UI_VAR_ADHOC_BOOKING_ENABLED, '0')
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_LOGIN_IN_PROGRESS, '0')
-    UIVarRegister(UI_DEVICES_ALL, UI_VAR_END_MEETING_ENABLE, '0')
+    UIVarRegisterWithFileStorage(UI_DEVICES_ALL, UI_VAR_END_MEETING_ENABLE, '0')
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_EMPLOYEE_CODE_ENTRY_IN_PROGRESS, '0')
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_HOME_PAGE_MODE, ItoA(UI_PAGE_INDEX_HOME_ERROR))
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_USER_IS_BOOKING_A_MEETNG, '0')
+}
+
+DEFINE_FUNCTION UserInterfaceHasRegistered(CHAR uiDeviceKey[]) {
+    STACK_VAR CHAR fileName[50]
+    
+    fileName = "'room_booking_ui_config_', uiDeviceKey, '.xml'"
+    
+    UILoadCurrentVarsFromXML(uiDeviceKey, fileName)
 }
 
 // END UI KIT

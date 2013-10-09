@@ -158,8 +158,8 @@
 <FilePathName>Code\lib\ui-kit\UI Kit API.axi</FilePathName>
 <Comments></Comments>
 </File>
-<File CompileType="None" Type="Include"><Identifier>UI Kit</Identifier>
-<FilePathName>Code\lib\ui-kit\UI Kit.axi</FilePathName>
+<File CompileType="None" Type="Include"><Identifier>UI Kit Core</Identifier>
+<FilePathName>Code\lib\ui-kit\UI Kit Core.axi</FilePathName>
 <Comments></Comments>
 </File>
 <File CompileType="None" Type="Include"><Identifier>UI Language API</Identifier>
