@@ -239,6 +239,19 @@ DATA_EVENT[vdvDatacraftController] {
 	    }
 	}
     }
+    COMMAND: {
+	STACK_VAR _SNAPI_DATA snapi
+	
+	SNAPI_InitDataFromString(snapi, data.text)
+	
+	switch(snapi.cmd) {
+	    case 'SET_SERVER_ADDRESS': {
+		datacraftIPAddress = snapi.param[1]
+		
+		SEND_COMMAND vdvDatacraft_DuetApiInterface, "'SESSION-START'"
+	    }
+	}
+    }
 }
 
 

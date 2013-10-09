@@ -63,6 +63,7 @@ DEFINE_FUNCTION UserInterfaceVarsShouldRegister() {
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_EMPLOYEE_CODE_ENTRY_IN_PROGRESS, '0')
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_HOME_PAGE_MODE, ItoA(UI_PAGE_INDEX_HOME_ERROR))
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_USER_IS_BOOKING_A_MEETNG, '0')
+    UIVarRegister(UI_DEVICES_ALL, UI_VAR_KEYBOARD_EDIT_MODE, '0')
 }
 
 DEFINE_FUNCTION UserInterfaceHasRegistered(CHAR uiDeviceKey[]) {
@@ -77,12 +78,12 @@ DEFINE_FUNCTION UINavShowSetup(CHAR uiDeviceKey[]) {
     STACK_VAR INTEGER roomID
     STACK_VAR INTEGER roomIndex
     
-    roomID = UIGetVarValueInt(uiDeviceKey, UI_VAR_ROOM_ID)
+    roomID = AtoI(UIGetVarValue(uiDeviceKey, UI_VAR_ROOM_ID))
     roomIndex = FindRoomIndexByID(roomID)
     
     UIText(uiDeviceKey, UI_JOIN_SETUP_ROOM_NAME, UI_STATE_ALL, "'Room Name:  ', rooms[roomIndex].name")
-    UIText(uiDeviceKey, UI_JOIN_SETUP_ROOM_NAME, UI_STATE_ALL, "'Room ID:  ', ItoA(roomID)")
-    UIText(uiDeviceKey, UI_JOIN_SETUP_ROOM_NAME, UI_STATE_ALL, "'Collection ID:  ', UIGetVarValue(uiDeviceKey, UI_VAR_ALT_ROOM_COLLECTION_ID)")
+    UIText(uiDeviceKey, UI_JOIN_SETUP_ROOM_ID, UI_STATE_ALL, "'Room ID:  ', ItoA(roomID)")
+    UIText(uiDeviceKey, UI_JOIN_SETUP_COLLECTION_ID, UI_STATE_ALL, "'Collection ID:  ', UIGetVarValue(uiDeviceKey, UI_VAR_ROOM_COLLECTION_ID)")
     UIText(uiDeviceKey, UI_JOIN_SETUP_SERVER_ADDRESS, UI_STATE_ALL, serverAddress)
     UIPage(uiDeviceKey, uiPageName_RoomBooking[UI_PAGE_INDEX_SETUP])
 }
@@ -606,8 +607,11 @@ DATA_EVENT[controllerDevice] {
 	    case 'EXTEND_MEETING_SELECT_TIME': {
 		n = AtoI(snapi.param[1])
 		if(n) {
-		    DC_MeetingExtend(11918, FindCurrentMeetingIDForRoom(TimeListGetRoomID('controller')), TimeListGetBtnTime('controller', n))
+		    DC_MeetingExtend(EXTEND_MEETING_USER_KEY, FindCurrentMeetingIDForRoom(TimeListGetRoomID('controller')), TimeListGetBtnTime('controller', n))
 		}
+	    }
+	    case 'SERVER_ADDRESS': {
+		serverAddress = snapi.param[1]
 	    }
 	    default: {
 		
@@ -619,6 +623,28 @@ DATA_EVENT[controllerDevice] {
 DATA_EVENT[uiDevice] {
     ONLINE: {
 	UpdateUI(UIGetKeyForDevice(data.device))
+    }
+    STRING: {
+	STACK_VAR CHAR uiDeviceKey[UI_KEY_MAX_LENGTH]
+	STACK_VAR CHAR temp[255]
+	STACK_VAR CHAR trash[255]
+	
+	uiDeviceKey = UIGetKeyForDevice(data.device)
+	temp = data.text
+	
+	if(FIND_STRING(temp, '-ABORT', 1)) {
+	    UISetVarValueInt(uiDeviceKey, UI_VAR_KEYBOARD_EDIT_MODE, 0)
+	} else if(FIND_STRING(temp, 'KEYB-', 1)) {
+	    
+	    trash = REMOVE_STRING(temp, 'KEYB-', 1)
+	    
+	    serverAddress = temp
+	    UIText(uiDeviceKey, UI_JOIN_SETUP_SERVER_ADDRESS, UI_STATE_ALL, serverAddress)
+	    
+	    UISetVarValueInt(uiDeviceKey, UI_VAR_KEYBOARD_EDIT_MODE, 0)
+	    
+	    SEND_COMMAND controllerDevice, "'SET_SERVER_ADDRESS-', serverAddress"
+	}
     }
 }
 
@@ -634,6 +660,13 @@ DATA_EVENT[duetDevice] {
 BUTTON_EVENT[uiDevice, UI_JOIN_ROOM_NAME] {
     HOLD[50]: {
 	UINavShowSetup(UIGetKeyForDevice(button.input.device))
+    }
+}
+
+BUTTON_EVENT[uiDevice, UI_JOIN_SETUP_SERVER_ADDRESS_EDIT] {
+    PUSH: {
+	UISetVarValueInt(UIGetKeyForDevice(button.input.device), UI_VAR_KEYBOARD_EDIT_MODE, 1)
+	SEND_COMMAND button.input.device, "'@AKB-', serverAddress, ';Edit the server connection URL'"
     }
 }
 
