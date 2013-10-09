@@ -694,6 +694,9 @@ BUTTON_EVENT[uiDevice, UI_JOIN_PAGE_BACK] {
 	    DebugSendStringToConsole('Back if')
 	    UINavShowMainMenu(uiDeviceKey)
 	} else {
+	    if(UIGetCurrentPageName(uiDeviceKey) == uiPageName_RoomBooking[UI_PAGE_INDEX_ENTER_CODE]) {
+		UISetVarValueInt(uiDeviceKey, UI_VAR_EMPLOYEE_CODE_ENTRY_IN_PROGRESS, 0)
+	    }
 	    UIPageBack(uiDeviceKey)
 	    DebugSendStringToConsole('Back else')
 	}
