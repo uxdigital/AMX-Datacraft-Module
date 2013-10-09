@@ -22,9 +22,12 @@ UI_MAX_DEVICES = 30
 
 //Meeting State Constants - Edit if these are different
 M_STATE_PROVISIONAL		= 1
-M_STATE_CONFIRMED		= 2
-M_STATE_IN_PROGRESS		= 4
-M_STATE_ENDED			= 6
+M_STATE_CONFIRMED		= 10
+M_STATE_IN_PROGRESS		= 9
+M_STATE_ENDED			= 11
+
+//Meeting Type for use with Ad Hoc bookings from the UI
+AD_HOC_MEETING_TYPE		= 20
 
 #INCLUDE 'Core Library'
 #INCLUDE 'UI Kit API'
@@ -210,7 +213,7 @@ DEFINE_FUNCTION UpdateUIwithRoomID(CHAR uiDeviceKey[], INTEGER roomID) {
 		UISetVarValue(uiDeviceKey, UI_VAR_BOOKING_IN_PROGRESS, '0')
 	    }
 	    UISetModeInUse(uiDeviceKey)
-	    if(rooms[roomIndex].todaysMeetings[meetingIndex].state >= M_STATE_PROVISIONAL && rooms[roomIndex].todaysMeetings[meetingIndex].state <= M_STATE_IN_PROGRESS) { // You may need to adjust these state values
+	    if(rooms[roomIndex].todaysMeetings[meetingIndex].state == M_STATE_PROVISIONAL OR rooms[roomIndex].todaysMeetings[meetingIndex].state == M_STATE_IN_PROGRESS) { // You may need to adjust these state values
 		SEND_COMMAND controllerDevice, "'CURRENT_MEETING_INFO-', ItoA(rooms[roomIndex].id), ',', ItoA(meetingID), ',',
 		    TimeAsTimeStamp(rooms[roomIndex].todaysMeetings[meetingIndex].startTime), ',',
 		    TimeAsTimeStamp(rooms[roomIndex].todaysMeetings[meetingIndex].endTime), ',',
@@ -313,7 +316,7 @@ DEFINE_FUNCTION DCEvent_UserLoginSuccess(CHAR username[], INTEGER userid, INTEGE
 	UISetVarValue(uiDeviceKey, UI_VAR_LOGIN_IN_PROGRESS, '0')
 	UISetVarValue(uiDeviceKey, UI_VAR_BOOKING_IN_PROGRESS, '1')
 	TimeCreate(t)
-	DC_AddBookingEx(roomID, 'GMT Standard Time', TimeAsTimeStamp(t), UIGetVarValue(uiDeviceKey, UI_VAR_BOOKING_SELECTED_TIME), currentUserID, collectionID, 'Ad hoc meeting', 9)
+	DC_AddBookingEx(roomID, 'GMT Standard Time', TimeAsTimeStamp(t), UIGetVarValue(uiDeviceKey, UI_VAR_BOOKING_SELECTED_TIME), currentUserID, collectionID, 'Ad hoc meeting', AD_HOC_MEETING_TYPE)
     }
     DebugAddDataToArray('User Login Success', 'username', username)
     DebugAddDataToArray('User Login Success', 'userid', ItoA(userid))
@@ -630,9 +633,9 @@ BUTTON_EVENT[uiDevice, UI_JOIN_START_MEETING] {
 	    }
 	    roomIndex = FindRoomIndexByID(roomID)
 	    meetingIndex = FindMeetingIndexByID(roomID, meetingID)
-	    if(rooms[roomIndex].todaysMeetings[meetingIndex].state == 2) {
+	    if(rooms[roomIndex].todaysMeetings[meetingIndex].state == M_STATE_CONFIRMED) {
 		DC_MeetingStart(0, meetingID)
-	    } else if(rooms[roomIndex].todaysMeetings[meetingIndex].state == 4) {
+	    } else if(rooms[roomIndex].todaysMeetings[meetingIndex].state == M_STATE_IN_PROGRESS) {
 		DC_MeetingEnd(0, meetingID)
 		RequestTodaysMeetings(roomID)
 	    }
