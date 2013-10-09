@@ -719,13 +719,16 @@ DEFINE_FUNCTION INTEGER AddMeetingData(_MEETING meeting, INTEGER meetingIndex) {
 	    }
 	} else {
 	    rooms[roomIndex].todaysMeetings[meetingIndex] = meeting
+	    DebugSendArrayToConsole("'AddMeetingData ID:', ItoA(meeting.id)")
 	    return meetingIndex
 	}
     } else {
-	DebugAddDataToArray('Process Meeting Info', 'ERROR', 'roomIndex == 0')
-	DebugSendArrayToConsole('Process Meeting Info')
+	DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'ERROR', 'roomIndex == 0')
+	DebugSendArrayToConsole("'AddMeetingData ID:', ItoA(meeting.id)")
 	return 0
     }
+    
+    DebugSendArrayToConsole("'AddMeetingData ID:', ItoA(meeting.id)")
 }
 
 DEFINE_FUNCTION INTEGER FindMeetingIndexByID(INTEGER roomID, LONG meetingID) {
@@ -778,20 +781,19 @@ DEFINE_FUNCTION INTEGER AddRoomData(_ROOM room) {
 
     if(existingIndex) {
 	DebugAddDataToArray('Process Room Info', 'Existing Room?', 'YES')
-	DebugSendArrayToConsole('Process Room Info')
 	rooms[existingIndex] = room
 	return existingIndex
     } else if(nextAvailableIndex) {
 	DebugAddDataToArray('Process Room Info', 'Existing Room?', 'NO')
-	DebugSendArrayToConsole('Process Room Info')
 	rooms[nextAvailableIndex] = room
 	RequestTodaysMeetings(room.id)
 	return nextAvailableIndex
     } else {
 	DebugAddDataToArray('Process Room Info', 'ERROR', 'No more space in data array!')
-	DebugSendArrayToConsole('Process Room Info')
 	return 0
     }
+    
+    DebugSendArrayToConsole('Process Room Info')
 }
 
 DEFINE_FUNCTION INTEGER FindRoomIndexByID(INTEGER roomID) {
@@ -824,7 +826,6 @@ DEFINE_FUNCTION INTEGER FindRoomIDforMeetingID(LONG meetingID) {
 		break
 	    }
 	}
-
 	if(result) {
 	    break
 	}
