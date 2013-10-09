@@ -35,6 +35,9 @@ AD_HOC_MEETING_TYPE		= 20
 #INCLUDE 'DatacraftTouchPanelAPI'
 #INCLUDE 'Datacraft UI Functions v1-01'
 
+DEFINE_VARIABLE
+
+CHAR serverAddress[255]
 
 (***********************************************************)
 (*                   UI KIT FUNCTIONS                      *)
@@ -70,7 +73,19 @@ DEFINE_FUNCTION UserInterfaceHasRegistered(CHAR uiDeviceKey[]) {
     UILoadCurrentVarsFromXML(uiDeviceKey, fileName)
 }
 
-// END UI KIT
+DEFINE_FUNCTION UINavShowSetup(CHAR uiDeviceKey[]) {
+    STACK_VAR INTEGER roomID
+    STACK_VAR INTEGER roomIndex
+    
+    roomID = UIGetVarValueInt(uiDeviceKey, UI_VAR_ROOM_ID)
+    roomIndex = FindRoomIndexByID(roomID)
+    
+    UIText(uiDeviceKey, UI_JOIN_SETUP_ROOM_NAME, UI_STATE_ALL, "'Room Name:  ', rooms[roomIndex].name")
+    UIText(uiDeviceKey, UI_JOIN_SETUP_ROOM_NAME, UI_STATE_ALL, "'Room ID:  ', ItoA(roomID)")
+    UIText(uiDeviceKey, UI_JOIN_SETUP_ROOM_NAME, UI_STATE_ALL, "'Collection ID:  ', UIGetVarValue(uiDeviceKey, UI_VAR_ALT_ROOM_COLLECTION_ID)")
+    UIText(uiDeviceKey, UI_JOIN_SETUP_SERVER_ADDRESS, UI_STATE_ALL, serverAddress)
+    UIPage(uiDeviceKey, uiPageName_RoomBooking[UI_PAGE_INDEX_SETUP])
+}
 
 DEFINE_FUNCTION UINavShowMainMenu(CHAR uiDeviceKey[]) {
     //RoomBookingUISendRoomName(uiDeviceKey)
@@ -616,6 +631,12 @@ DATA_EVENT[duetDevice] {
     }
 }
 
+BUTTON_EVENT[uiDevice, UI_JOIN_ROOM_NAME] {
+    HOLD[50]: {
+	UINavShowSetup(UIGetKeyForDevice(button.input.device))
+    }
+}
+
 BUTTON_EVENT[uiDevice, UI_JOIN_START_MEETING] {
     PUSH: {
 	STACK_VAR CHAR uiDeviceKey[UI_KEY_MAX_LENGTH]
@@ -667,7 +688,9 @@ BUTTON_EVENT[uiDevice, UI_JOIN_PAGE_BACK] {
 	STACK_VAR CHAR uiDeviceKey[UI_KEY_MAX_LENGTH]
 	
 	uiDeviceKey = UIGetKeyForDevice(button.input.device)
-	if(UIGetCurrentPageName(uiDeviceKey) == uiPageName_RoomBooking[UI_PAGE_INDEX_SELECT_TIME] OR UIGetCurrentPageName(uiDeviceKey) == uiPageName_RoomBooking[UI_PAGE_INDEX_SELECT_TIME_MORE]) {
+	if(UIGetCurrentPageName(uiDeviceKey) == uiPageName_RoomBooking[UI_PAGE_INDEX_SETUP]) {
+	    UINavShowMainMenu(uiDeviceKey)
+	} else if(UIGetCurrentPageName(uiDeviceKey) == uiPageName_RoomBooking[UI_PAGE_INDEX_SELECT_TIME] OR UIGetCurrentPageName(uiDeviceKey) == uiPageName_RoomBooking[UI_PAGE_INDEX_SELECT_TIME_MORE]) {
 	    DebugSendStringToConsole('Back if')
 	    UINavShowMainMenu(uiDeviceKey)
 	} else {
