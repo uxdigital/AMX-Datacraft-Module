@@ -120,7 +120,7 @@
 <SysID>0</SysID>
 <TransSerial>COM3,38400,8,None,1,None,,</TransSerial>
 <TransModem>COM1,38400,8,None,1,None</TransModem>
-<TransTCPIP>192.168.3.149:1319:1: ::</TransTCPIP>
+<TransTCPIP>10.0.1.164:1319:1: ::</TransTCPIP>
 <VirtualNetLinxMasterFlag>0</VirtualNetLinxMasterFlag>
 <VNMRestoreIPSettings>0.0.0.0:1319:1</VNMRestoreIPSettings>
 <VNMSystemID>1</VNMSystemID>
@@ -130,10 +130,6 @@
 <UserName></UserName>
 <Password></Password>
 <Comments></Comments>
-<File CompileType="None" Type="Include"><Identifier>Core Library v1-02</Identifier>
-<FilePathName>Code\Core Library v1-02.axi</FilePathName>
-<Comments></Comments>
-</File>
 <File CompileType="None" Type="Include"><Identifier>Datacraft UI Controller Constansts v1-01</Identifier>
 <FilePathName>Code\Datacraft UI Controller Constansts v1-01.axi</FilePathName>
 <Comments></Comments>
@@ -154,6 +150,22 @@
 <FilePathName>Code\DatacraftTouchPanelAPI.axi</FilePathName>
 <Comments></Comments>
 </File>
+<File CompileType="None" Type="Include"><Identifier>Core Library</Identifier>
+<FilePathName>Code\lib\core-library\Core Library.axi</FilePathName>
+<Comments></Comments>
+</File>
+<File CompileType="None" Type="Include"><Identifier>UI Kit API</Identifier>
+<FilePathName>Code\lib\ui-kit\UI Kit API.axi</FilePathName>
+<Comments></Comments>
+</File>
+<File CompileType="None" Type="Include"><Identifier>UI Kit Core</Identifier>
+<FilePathName>Code\lib\ui-kit\UI Kit Core.axi</FilePathName>
+<Comments></Comments>
+</File>
+<File CompileType="None" Type="Include"><Identifier>UI Language API</Identifier>
+<FilePathName>Code\lib\ui-kit\UI Language API.axi</FilePathName>
+<Comments></Comments>
+</File>
 <File CompileType="Netlinx" Type="MasterSrc"><Identifier>Main</Identifier>
 <FilePathName>Code\Main.axs</FilePathName>
 <Comments></Comments>
@@ -170,18 +182,6 @@
 <FilePathName>Code\UI Controller v1-01.axi</FilePathName>
 <Comments></Comments>
 </File>
-<File CompileType="None" Type="Include"><Identifier>UI Kit API v1-01</Identifier>
-<FilePathName>Code\UI Kit API v1-01.axi</FilePathName>
-<Comments></Comments>
-</File>
-<File CompileType="None" Type="Include"><Identifier>UI Kit v1-01</Identifier>
-<FilePathName>Code\UI Kit v1-01.axi</FilePathName>
-<Comments></Comments>
-</File>
-<File CompileType="None" Type="Include"><Identifier>UI Language API v1-01</Identifier>
-<FilePathName>Code\UI Language API v1-01.axi</FilePathName>
-<Comments></Comments>
-</File>
 <File CompileType="None" Type="Other"><Identifier>DatacraftAMXInterfaceProgramming</Identifier>
 <FilePathName>DatacraftAMXInterfaceProgramming.pdf</FilePathName>
 <Comments></Comments>
@@ -192,9 +192,15 @@
 <DeviceMap DevAddr="dvUI_RoomControlPanel_1"><DevName>dvUI_RoomControlPanel_1</DevName>
 </DeviceMap>
 </File>
-<File CompileType="None" Type="TP4"><Identifier>Datacraft Room Booking Panel</Identifier>
-<FilePathName>Touch Panels\Datacraft Room Booking Panel.TP4</FilePathName>
+<File CompileType="None" Type="TP4"><Identifier>Room Booking Panel - iPad (TPControl)</Identifier>
+<FilePathName>Touch Panels\Room Booking Panel - iPad (TPControl).TP4</FilePathName>
 <Comments></Comments>
+</File>
+<File CompileType="None" Type="TP4"><Identifier>Room Booking Panel - MXD-1000</Identifier>
+<FilePathName>Touch Panels\Room Booking Panel - MXD-1000.TP4</FilePathName>
+<Comments></Comments>
+<DeviceMap DevAddr="dvUI_RoomBookingPanel_1"><DevName>dvUI_RoomBookingPanel_1</DevName>
+</DeviceMap>
 </File>
 </System>
 </Project>

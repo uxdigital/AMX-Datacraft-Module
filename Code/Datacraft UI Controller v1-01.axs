@@ -22,16 +22,25 @@ UI_MAX_DEVICES = 30
 
 //Meeting State Constants - Edit if these are different
 M_STATE_PROVISIONAL		= 1
-M_STATE_CONFIRMED		= 2
-M_STATE_IN_PROGRESS		= 4
-M_STATE_ENDED			= 6
+M_STATE_CONFIRMED		= 10
+M_STATE_IN_PROGRESS		= 9
+M_STATE_ENDED			= 11
 
-#INCLUDE 'Core Library v1-02'
-#INCLUDE 'UI Kit API v1-01'
+//Meeting Type for use with Ad Hoc bookings from the UI
+AD_HOC_MEETING_TYPE		= 20
+
+//Set for API User key for permissions
+EXTEND_MEETING_USER_KEY		= 2
+
+#INCLUDE 'Core Library'
+#INCLUDE 'UI Kit API'
 #INCLUDE 'Datacraft UI Controller Constansts v1-01'
 #INCLUDE 'DatacraftTouchPanelAPI'
 #INCLUDE 'Datacraft UI Functions v1-01'
 
+DEFINE_VARIABLE
+
+CHAR serverAddress[255]
 
 (***********************************************************)
 (*                   UI KIT FUNCTIONS                      *)
@@ -46,20 +55,55 @@ DEFINE_FUNCTION UserInterfacesShouldRegister() {
 }
 
 DEFINE_FUNCTION UserInterfaceVarsShouldRegister() {
-    UIVarRegister(UI_DEVICES_ALL, UI_VAR_ROOM_ID, '0')
-    UIVarRegister(UI_DEVICES_ALL, UI_VAR_ROOM_COLLECTION_ID, '0')
+    UIVarRegisterWithFileStorage(UI_DEVICES_ALL, UI_VAR_ROOM_ID, '0')
+    UIVarRegisterWithFileStorage(UI_DEVICES_ALL, UI_VAR_ROOM_COLLECTION_ID, '0')
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_EMPLOYEE_CODE_ENTRY, '03')
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_BOOKING_SELECTED_TIME, '')
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_BOOKING_IN_PROGRESS, '0')
-    UIVarRegister(UI_DEVICES_ALL, UI_VAR_ADHOC_BOOKING_ENABLED, '0')
+    UIVarRegisterWithFileStorage(UI_DEVICES_ALL, UI_VAR_ADHOC_BOOKING_ENABLED, '0')
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_LOGIN_IN_PROGRESS, '0')
-    UIVarRegister(UI_DEVICES_ALL, UI_VAR_END_MEETING_ENABLE, '0')
+    UIVarRegisterWithFileStorage(UI_DEVICES_ALL, UI_VAR_END_MEETING_ENABLE, '0')
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_EMPLOYEE_CODE_ENTRY_IN_PROGRESS, '0')
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_HOME_PAGE_MODE, ItoA(UI_PAGE_INDEX_HOME_ERROR))
     UIVarRegister(UI_DEVICES_ALL, UI_VAR_USER_IS_BOOKING_A_MEETNG, '0')
+    UIVarRegister(UI_DEVICES_ALL, UI_VAR_KEYBOARD_EDIT_MODE, '0')
+}
+
+DEFINE_FUNCTION UserInterfaceHasRegistered(CHAR uiDeviceKey[]) {
+    LoadUIData(uiDeviceKey)
 }
 
 // END UI KIT
+
+DEFINE_FUNCTION SaveUIData(CHAR uiDeviceKey[]) {
+    STACK_VAR CHAR fileName[50]
+    
+    fileName = "'room_booking_ui_config_', uiDeviceKey, '.xml'"
+    
+    UISaveCurrentVarsToXML(uiDeviceKey, fileName)
+}
+
+DEFINE_FUNCTION LoadUIData(CHAR uiDeviceKey[]) {
+    STACK_VAR CHAR fileName[50]
+    
+    fileName = "'room_booking_ui_config_', uiDeviceKey, '.xml'"
+    
+    UILoadCurrentVarsFromXML(uiDeviceKey, fileName)
+}
+
+DEFINE_FUNCTION UINavShowSetup(CHAR uiDeviceKey[]) {
+    STACK_VAR INTEGER roomID
+    STACK_VAR INTEGER roomIndex
+    
+    roomID = AtoI(UIGetVarValue(uiDeviceKey, UI_VAR_ROOM_ID))
+    roomIndex = FindRoomIndexByID(roomID)
+    
+    UIText(uiDeviceKey, UI_JOIN_SETUP_ROOM_NAME, UI_STATE_ALL, "'Room Name:  ', rooms[roomIndex].name")
+    UIText(uiDeviceKey, UI_JOIN_SETUP_ROOM_ID, UI_STATE_ALL, "'Room ID:  ', ItoA(roomID)")
+    UIText(uiDeviceKey, UI_JOIN_SETUP_COLLECTION_ID, UI_STATE_ALL, "'Collection ID:  ', UIGetVarValue(uiDeviceKey, UI_VAR_ROOM_COLLECTION_ID)")
+    UIText(uiDeviceKey, UI_JOIN_SETUP_SERVER_ADDRESS, UI_STATE_ALL, serverAddress)
+    UIPage(uiDeviceKey, uiPageName_RoomBooking[UI_PAGE_INDEX_SETUP])
+}
 
 DEFINE_FUNCTION UINavShowMainMenu(CHAR uiDeviceKey[]) {
     //RoomBookingUISendRoomName(uiDeviceKey)
@@ -202,7 +246,7 @@ DEFINE_FUNCTION UpdateUIwithRoomID(CHAR uiDeviceKey[], INTEGER roomID) {
 		UISetVarValue(uiDeviceKey, UI_VAR_BOOKING_IN_PROGRESS, '0')
 	    }
 	    UISetModeInUse(uiDeviceKey)
-	    if(rooms[roomIndex].todaysMeetings[meetingIndex].state >= M_STATE_PROVISIONAL && rooms[roomIndex].todaysMeetings[meetingIndex].state <= M_STATE_IN_PROGRESS) { // You may need to adjust these state values
+	    if(rooms[roomIndex].todaysMeetings[meetingIndex].state == M_STATE_PROVISIONAL OR rooms[roomIndex].todaysMeetings[meetingIndex].state == M_STATE_IN_PROGRESS) { // You may need to adjust these state values
 		SEND_COMMAND controllerDevice, "'CURRENT_MEETING_INFO-', ItoA(rooms[roomIndex].id), ',', ItoA(meetingID), ',',
 		    TimeAsTimeStamp(rooms[roomIndex].todaysMeetings[meetingIndex].startTime), ',',
 		    TimeAsTimeStamp(rooms[roomIndex].todaysMeetings[meetingIndex].endTime), ',',
@@ -305,7 +349,7 @@ DEFINE_FUNCTION DCEvent_UserLoginSuccess(CHAR username[], INTEGER userid, INTEGE
 	UISetVarValue(uiDeviceKey, UI_VAR_LOGIN_IN_PROGRESS, '0')
 	UISetVarValue(uiDeviceKey, UI_VAR_BOOKING_IN_PROGRESS, '1')
 	TimeCreate(t)
-	DC_AddBookingEx(roomID, 'GMT Standard Time', TimeAsTimeStamp(t), UIGetVarValue(uiDeviceKey, UI_VAR_BOOKING_SELECTED_TIME), currentUserID, collectionID, 'Ad hoc meeting', 9)
+	DC_AddBookingEx(roomID, 'GMT Standard Time', TimeAsTimeStamp(t), UIGetVarValue(uiDeviceKey, UI_VAR_BOOKING_SELECTED_TIME), currentUserID, collectionID, 'Ad hoc meeting', AD_HOC_MEETING_TYPE)
     }
     DebugAddDataToArray('User Login Success', 'username', username)
     DebugAddDataToArray('User Login Success', 'userid', ItoA(userid))
@@ -529,6 +573,7 @@ DATA_EVENT[controllerDevice] {
 			if(AtoI(snapi.param[2])) {
 			    UISetVarValue(UIGetKeyForIndex(n), UI_VAR_ROOM_ID, snapi.param[2])
 			    UISetVarValue(UIGetKeyForIndex(n), UI_VAR_ROOM_COLLECTION_ID, snapi.param[3])
+			    SaveUIData(UIGetKeyForIndex(n))
 			    RefreshRoom(AtoI(snapi.param[2]))
 			}
 		    }
@@ -539,6 +584,7 @@ DATA_EVENT[controllerDevice] {
 		if(n) {
 		    if(UIIsRegistered(n)) {
 			UISetVarValue(UIGetKeyForIndex(n), UI_VAR_ADHOC_BOOKING_ENABLED, snapi.param[2])
+			SaveUIData(UIGetKeyForIndex(n))
 		    }
 		}
 	    }
@@ -547,6 +593,7 @@ DATA_EVENT[controllerDevice] {
 		if(n) {
 		    if(UIIsRegistered(n)) {
 			UISetVarValue(UIGetKeyForIndex(n), UI_VAR_END_MEETING_ENABLE, snapi.param[2])
+			SaveUIData(UIGetKeyForIndex(n))
 		    }
 		}
 	    }
@@ -580,8 +627,11 @@ DATA_EVENT[controllerDevice] {
 	    case 'EXTEND_MEETING_SELECT_TIME': {
 		n = AtoI(snapi.param[1])
 		if(n) {
-		    DC_MeetingExtend(11918, FindCurrentMeetingIDForRoom(TimeListGetRoomID('controller')), TimeListGetBtnTime('controller', n))
+		    DC_MeetingExtend(EXTEND_MEETING_USER_KEY, FindCurrentMeetingIDForRoom(TimeListGetRoomID('controller')), TimeListGetBtnTime('controller', n))
 		}
+	    }
+	    case 'SERVER_ADDRESS': {
+		serverAddress = snapi.param[1]
 	    }
 	    default: {
 		
@@ -594,6 +644,28 @@ DATA_EVENT[uiDevice] {
     ONLINE: {
 	UpdateUI(UIGetKeyForDevice(data.device))
     }
+    STRING: {
+	STACK_VAR CHAR uiDeviceKey[UI_KEY_MAX_LENGTH]
+	STACK_VAR CHAR temp[255]
+	STACK_VAR CHAR trash[255]
+	
+	uiDeviceKey = UIGetKeyForDevice(data.device)
+	temp = data.text
+	
+	if(FIND_STRING(temp, '-ABORT', 1)) {
+	    UISetVarValueInt(uiDeviceKey, UI_VAR_KEYBOARD_EDIT_MODE, 0)
+	} else if(FIND_STRING(temp, 'KEYB-', 1)) {
+	    
+	    trash = REMOVE_STRING(temp, 'KEYB-', 1)
+	    
+	    serverAddress = temp
+	    UIText(uiDeviceKey, UI_JOIN_SETUP_SERVER_ADDRESS, UI_STATE_ALL, serverAddress)
+	    
+	    UISetVarValueInt(uiDeviceKey, UI_VAR_KEYBOARD_EDIT_MODE, 0)
+	    
+	    SEND_COMMAND controllerDevice, "'SET_SERVER_ADDRESS-', serverAddress"
+	}
+    }
 }
 
 DATA_EVENT[duetDevice] {
@@ -602,6 +674,19 @@ DATA_EVENT[duetDevice] {
 	wait 20 {
 	    UpdateMeetingsForRegisteredRooms()
 	}
+    }
+}
+
+BUTTON_EVENT[uiDevice, UI_JOIN_ROOM_NAME] {
+    HOLD[50]: {
+	UINavShowSetup(UIGetKeyForDevice(button.input.device))
+    }
+}
+
+BUTTON_EVENT[uiDevice, UI_JOIN_SETUP_SERVER_ADDRESS_EDIT] {
+    PUSH: {
+	UISetVarValueInt(UIGetKeyForDevice(button.input.device), UI_VAR_KEYBOARD_EDIT_MODE, 1)
+	SEND_COMMAND button.input.device, "'@AKB-', serverAddress, ';Edit the server connection URL'"
     }
 }
 
@@ -622,9 +707,9 @@ BUTTON_EVENT[uiDevice, UI_JOIN_START_MEETING] {
 	    }
 	    roomIndex = FindRoomIndexByID(roomID)
 	    meetingIndex = FindMeetingIndexByID(roomID, meetingID)
-	    if(rooms[roomIndex].todaysMeetings[meetingIndex].state == 2) {
+	    if(rooms[roomIndex].todaysMeetings[meetingIndex].state == M_STATE_CONFIRMED) {
 		DC_MeetingStart(0, meetingID)
-	    } else if(rooms[roomIndex].todaysMeetings[meetingIndex].state == 4) {
+	    } else if(rooms[roomIndex].todaysMeetings[meetingIndex].state == M_STATE_IN_PROGRESS) {
 		DC_MeetingEnd(0, meetingID)
 		RequestTodaysMeetings(roomID)
 	    }
@@ -656,10 +741,15 @@ BUTTON_EVENT[uiDevice, UI_JOIN_PAGE_BACK] {
 	STACK_VAR CHAR uiDeviceKey[UI_KEY_MAX_LENGTH]
 	
 	uiDeviceKey = UIGetKeyForDevice(button.input.device)
-	if(UIGetCurrentPageName(uiDeviceKey) == uiPageName_RoomBooking[UI_PAGE_INDEX_SELECT_TIME] OR UIGetCurrentPageName(uiDeviceKey) == uiPageName_RoomBooking[UI_PAGE_INDEX_SELECT_TIME_MORE]) {
+	if(UIGetCurrentPageName(uiDeviceKey) == uiPageName_RoomBooking[UI_PAGE_INDEX_SETUP]) {
+	    UINavShowMainMenu(uiDeviceKey)
+	} else if(UIGetCurrentPageName(uiDeviceKey) == uiPageName_RoomBooking[UI_PAGE_INDEX_SELECT_TIME] OR UIGetCurrentPageName(uiDeviceKey) == uiPageName_RoomBooking[UI_PAGE_INDEX_SELECT_TIME_MORE]) {
 	    DebugSendStringToConsole('Back if')
 	    UINavShowMainMenu(uiDeviceKey)
 	} else {
+	    if(UIGetCurrentPageName(uiDeviceKey) == uiPageName_RoomBooking[UI_PAGE_INDEX_ENTER_CODE]) {
+		UISetVarValueInt(uiDeviceKey, UI_VAR_EMPLOYEE_CODE_ENTRY_IN_PROGRESS, 0)
+	    }
 	    UIPageBack(uiDeviceKey)
 	    DebugSendStringToConsole('Back else')
 	}

@@ -55,15 +55,15 @@ PROGRAM_NAME='Main'
 
 DEFINE_VARIABLE
 
-CHAR datacraftIPAddress[]		= '81.137.76.18:9003'
-INTEGER roomBookingIDForThisRoom	= 26
+PERSISTENT CHAR datacraftIPAddress[255]		//= '10.0.0.25:83'
+INTEGER roomBookingIDForThisRoom		= 26
 (*******************************************************************************)
 (*  IMPORT CORE LIBRARY HERE                                                   *)
 (*  This is includes generic functions and code which can be re-used in main   *)
 (*  and other modules. Also includes 'SNAPI' and some add-on functions.        *)
 (*******************************************************************************)
 #DEFINE CORE_LIBRARY
-#INCLUDE 'Core Library v1-02'
+#INCLUDE 'Core Library'
 
 
 (*******************************************************************************)
@@ -222,9 +222,11 @@ DEFINE_EVENT
 DATA_EVENT[vdvDatacraftController] {
     ONLINE: {
 	wait 20 {
+	    SEND_COMMAND vdvDatacraftController, "'SERVER_ADDRESS-', datacraftIPAddress"
+	    
 	    // set the room key for the room booking panel to 26 and collection key as 10
-	    RoomBookingSetRoomID(1, 26, 10)
-	    RoomBookingSetRoomID(2, 26, 10)
+	    RoomBookingSetRoomID(1, 4, 9)
+	    RoomBookingSetRoomID(2, 4, 9)
 	    
 	    // set to true if you wan the panel to accept adhoc bookings
 	    RoomBookingSetAdhocBooking(1, TRUE)
@@ -236,6 +238,19 @@ DATA_EVENT[vdvDatacraftController] {
 	    
 	    wait 20 {
 		TimeStart()
+	    }
+	}
+    }
+    COMMAND: {
+	STACK_VAR _SNAPI_DATA snapi
+	
+	SNAPI_InitDataFromString(snapi, data.text)
+	
+	switch(snapi.cmd) {
+	    case 'SET_SERVER_ADDRESS': {
+		datacraftIPAddress = snapi.param[1]
+		
+		SEND_COMMAND vdvDatacraft_DuetApiInterface, "'SESSION-START'"
 	    }
 	}
     }

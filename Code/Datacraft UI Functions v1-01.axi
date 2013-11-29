@@ -26,6 +26,7 @@ CHAR UI_VAR_END_MEETING_ENABLE[]			= 'endMeetingEnable'
 CHAR UI_VAR_EMPLOYEE_CODE_ENTRY_IN_PROGRESS[]		= 'codeEntryInProgess'
 CHAR UI_VAR_HOME_PAGE_MODE[]				= 'homePageMode'
 CHAR UI_VAR_USER_IS_BOOKING_A_MEETNG[]			= 'userIsBookingAMeeting'
+CHAR UI_VAR_KEYBOARD_EDIT_MODE[]			= 'keyboardEditMode'
 
 INTEGER MEETING_TITLE_MAX_LENGTH			= 50
 INTEGER NAME_MAX_LENGTH					= 50
@@ -678,14 +679,15 @@ DEFINE_FUNCTION INTEGER AddMeetingData(_MEETING meeting, INTEGER meetingIndex) {
 	DC_GetRoomDetails(room.id)
     }
 
-    DebugAddDataToArray('Process Meeting Info', 'meeting.id', ItoA(meeting.id))
-    DebugAddDataToArray('Process Meeting Info', 'meeting.index', ItoA(meeting.index))
-    DebugAddDataToArray('Process Meeting Info', 'meeting.roomID', ItoA(meeting.roomID))
-    DebugAddDataToArray('Process Meeting Info', 'meeting.title', meeting.title)
-    DebugAddDataToArray('Process Meeting Info', 'meeting.ownerName', meeting.ownerName)
-    DebugAddDataToArray('Process Meeting Info', 'meeting.agentName', meeting.agentName)
-    DebugAddDataToArray('Process Meeting Info', 'meeting.startTime', "'[', TimeAsTimeStamp(meeting.startTime), ']'")
-    DebugAddDataToArray('Process Meeting Info', 'meeting.endTime', "'[', TimeAsTimeStamp(meeting.endTime), ']'")
+    DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'meeting.index', ItoA(meeting.index))
+    DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'meeting.roomID', ItoA(meeting.roomID))
+    DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'meeting.title', meeting.title)
+    DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'meeting.state', ItoA(meeting.state))
+    DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'meeting.type', ItoA(meeting.type))
+    DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'meeting.ownerName', meeting.ownerName)
+    DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'meeting.agentName', meeting.agentName)
+    DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'meeting.startTime', "'[', TimeAsTimeStamp(meeting.startTime), ']'")
+    DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'meeting.endTime', "'[', TimeAsTimeStamp(meeting.endTime), ']'")
 
     if(roomIndex) {
 	if(!meetingIndex) {
@@ -695,38 +697,39 @@ DEFINE_FUNCTION INTEGER AddMeetingData(_MEETING meeting, INTEGER meetingIndex) {
 		    break
 		}
 	    }
-
 	    for(n = 1; n <= MAX_LENGTH_ARRAY(rooms[roomIndex].todaysMeetings); n ++) {
 		if(rooms[roomIndex].todaysMeetings[n].id == meeting.id) {
 		    existingIndex = n
 		    break
 		}
 	    }
-
 	    if(existingIndex) {
-		DebugAddDataToArray('Process Meeting Info', 'Existing Meeting?', 'YES')
-		DebugSendArrayToConsole('Process Meeting Info')
+		DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'Existing Meeting?', 'YES')
 		rooms[roomIndex].todaysMeetings[existingIndex] = meeting
+		DebugSendArrayToConsole("'AddMeetingData ID:', ItoA(meeting.id)")
 		return existingIndex
 	    } else if(nextAvailableIndex) {
-		DebugAddDataToArray('Process Meeting Info', 'Existing Meeting?', 'NO')
-		DebugSendArrayToConsole('Process Meeting Info')
+		DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'Existing Meeting?', 'NO')
 		rooms[roomIndex].todaysMeetings[nextAvailableIndex] = meeting
+		DebugSendArrayToConsole("'AddMeetingData ID:', ItoA(meeting.id)")
 		return nextAvailableIndex
 	    } else {
-		DebugAddDataToArray('Process Meeting Info', 'ERROR', 'No more space in data array!')
-		DebugSendArrayToConsole('Process Meeting Info')
+		DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'ERROR', 'No more space in data array!')
+		DebugSendArrayToConsole("'AddMeetingData ID:', ItoA(meeting.id)")
 		return 0
 	    }
 	} else {
 	    rooms[roomIndex].todaysMeetings[meetingIndex] = meeting
+	    DebugSendArrayToConsole("'AddMeetingData ID:', ItoA(meeting.id)")
 	    return meetingIndex
 	}
     } else {
-	DebugAddDataToArray('Process Meeting Info', 'ERROR', 'roomIndex == 0')
-	DebugSendArrayToConsole('Process Meeting Info')
+	DebugAddDataToArray("'AddMeetingData ID:', ItoA(meeting.id)", 'ERROR', 'roomIndex == 0')
+	DebugSendArrayToConsole("'AddMeetingData ID:', ItoA(meeting.id)")
 	return 0
     }
+    
+    DebugSendArrayToConsole("'AddMeetingData ID:', ItoA(meeting.id)")
 }
 
 DEFINE_FUNCTION INTEGER FindMeetingIndexByID(INTEGER roomID, LONG meetingID) {
@@ -779,20 +782,19 @@ DEFINE_FUNCTION INTEGER AddRoomData(_ROOM room) {
 
     if(existingIndex) {
 	DebugAddDataToArray('Process Room Info', 'Existing Room?', 'YES')
-	DebugSendArrayToConsole('Process Room Info')
 	rooms[existingIndex] = room
 	return existingIndex
     } else if(nextAvailableIndex) {
 	DebugAddDataToArray('Process Room Info', 'Existing Room?', 'NO')
-	DebugSendArrayToConsole('Process Room Info')
 	rooms[nextAvailableIndex] = room
 	RequestTodaysMeetings(room.id)
 	return nextAvailableIndex
     } else {
 	DebugAddDataToArray('Process Room Info', 'ERROR', 'No more space in data array!')
-	DebugSendArrayToConsole('Process Room Info')
 	return 0
     }
+    
+    DebugSendArrayToConsole('Process Room Info')
 }
 
 DEFINE_FUNCTION INTEGER FindRoomIndexByID(INTEGER roomID) {
@@ -825,7 +827,6 @@ DEFINE_FUNCTION INTEGER FindRoomIDforMeetingID(LONG meetingID) {
 		break
 	    }
 	}
-
 	if(result) {
 	    break
 	}
